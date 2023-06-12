@@ -42,8 +42,8 @@ public class FloodGossip extends GenericProtocol {
 
     // We wait until we receive a ChannelNotification from the membership protocol to know which networkChannel to use
     private void onChannelNotification(ChannelNotification not, short sourceProto) {
-        logger.info("I am {}", not.getMyself());
-        logger.info("Using channel {} for communication", not.getChannelId());
+        logger.debug("I am {}", not.getMyself());
+        logger.debug("Using channel {} for communication", not.getChannelId());
         myself = not.getMyself();
         try {
             registerSharedChannel(not.getChannelId());

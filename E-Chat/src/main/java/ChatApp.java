@@ -4,10 +4,15 @@ import org.apache.logging.log4j.Logger;
 import pt.unl.fct.di.novasys.babel.core.GenericProtocol;
 import pt.unl.fct.di.novasys.babel.exceptions.HandlerRegistrationException;
 import pt.unl.fct.di.novasys.babel.internal.InternalEvent;
+import pt.unl.fct.di.novasys.network.data.Host;
 import requests.BroadcastRequest;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
+import java.util.Scanner;
+import java.util.StringTokenizer;
 import java.util.concurrent.BlockingQueue;
 
 public class ChatApp extends GenericProtocol {
@@ -24,25 +29,28 @@ public class ChatApp extends GenericProtocol {
     public void init(Properties props) throws HandlerRegistrationException, IOException {
         subscribeNotification(DeliverNotification.NOTIFICATION_ID, this::uponDeliver);
 
-        new Thread(() -> {
-            try {
-                inputLoop();
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-        }).start();
+        new Thread(this::readSystemIn).start();
     }
 
-    private void inputLoop() {
+    private void readSystemIn() {
+        Scanner scanner = new Scanner(System.in);
         while (true) {
-            String msg = System.console().readLine();
-            if (msg.equals("exit")) System.exit(0);
-            else if (msg.equals("help")) System.out.println("Type 'exit' to exit");
-            else {
-                sendRequest(new BroadcastRequest(msg), FloodGossip.PROTO_ID);
+            try {
+                String line = scanner.nextLine();
+                if (line == null) break;
+                if (line.equals("quit")) {
+                    System.exit(0);
+                }
+                readCommand(line);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(-1);
             }
         }
+    }
+
+    private void readCommand(String line) {
+        sendRequest(new BroadcastRequest(line), FloodGossip.PROTO_ID);
     }
 
     private void uponDeliver(DeliverNotification not, short sourceProto) {
