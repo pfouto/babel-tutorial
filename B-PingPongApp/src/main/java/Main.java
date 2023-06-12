@@ -12,8 +12,6 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        System.setProperty("log4j2.configurationFile", "log4j2.xml");
-
         //Creates a new instance of babel
         Babel babel = Babel.getInstance();
 
@@ -30,12 +28,12 @@ public class Main {
         babel.registerProtocol(pingPong);
         babel.registerProtocol(app);
 
+        //Starts babel
+        babel.start();
+
         //Initializes the protocol
         pingPong.init(props);
         app.init(props);
-
-        //Starts babel
-        babel.start();
     }
 
 }

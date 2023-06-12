@@ -22,21 +22,16 @@ import java.util.Properties;
 
 public class PingPongProtocol extends GenericProtocol {
 
-
     public static final int DEFAULT_PORT = 9000; // default port to listen on
     private static final Logger logger = LogManager.getLogger(PingPongProtocol.class); // logger for the protocol
     public static final short PROTO_ID = 1; // unique protocol id
 
-
     private int channelId; // id of the channel used by the protocol
 
     private int nextPingId = 0; // id of the next ping message to send
-    private int pingIntervalMillis; // interval between pings
+    private int pingIntervalMillis = 10; // interval between pings
 
-    private int nextPendingRequest = 0; // id of the next pending request
-
-    private PingRequest ongoingRequest = null; // ongoing request (if any)
-    private short ongoingRequestSource = -1; // source of the ongoing request (if any)
+    private PingState ongoingPing; // state of the ongoing ping
 
     private Map<Integer, Long> ongoingPings = new HashMap<>(); // map of ongoing pings (id -> send time)
 
@@ -100,8 +95,8 @@ public class PingPongProtocol extends GenericProtocol {
     }
 
     private void uponReceivePingRequest(PingRequest pingRequest, short sourceProtocol) {
-        ongoingRequest = pingRequest;
-        logger.info("Received ping request to {}. Sending {} pings.",
+        ongoingPing = new PingState(pingRequest, sourceProtocol);
+        logger.debug("Received ping request to {}. Sending {} pings.",
                 pingRequest.getDestination(), pingRequest.getNPings());
         openConnection(pingRequest.getDestination(), channelId);
     }
@@ -114,18 +109,16 @@ public class PingPongProtocol extends GenericProtocol {
      */
     private void uponNextPing(NextPingTimer timer, long timerId) {
         // send a ping message to target
-        sendPingMessage(ongoingRequest.getDestination(),
-                ongoingRequest.getMessage());
+        sendPingMessage(ongoingPing.getRequest().getDestination(), ongoingPing.getRequest().getMessage());
 
         // increment the number of sent pings in the timer
         timer.incrementSentPings();
 
-        if (timer.getSentPings() >= ongoingRequest.getNPings()) { // if we have sent all pings
-            logger.info("Sent {} pings. Closing connection", timer.getSentPings());
-            cancelTimer(timerId); // cancel the timer
-            closeConnection(ongoingRequest.getDestination(), channelId); // close the connection
-            System.exit(0); // exit
+        if (timer.getSentPings() < ongoingPing.getRequest().getNPings()) {
+            // set the timer to fire again after the pingIntervalMillis
+            setupTimer(timer, pingIntervalMillis);
         }
+
     }
 
     /**
@@ -135,9 +128,9 @@ public class PingPongProtocol extends GenericProtocol {
      * @param channel Channel ID
      */
     private void uponOutConnectionUp(OutConnectionUp event, int channel) {
-        logger.info("Connection to {} is now up", event.getNode());
+        logger.debug("Connection to {} is now up", event.getNode());
         // start the timer
-        setupPeriodicTimer(new NextPingTimer(), 0, pingIntervalMillis);
+        uponNextPing(new NextPingTimer(), -1);
     }
 
     /**
@@ -172,7 +165,7 @@ public class PingPongProtocol extends GenericProtocol {
      * @param channelId Source channel ID (from which channel was the message was received)
      */
     public void uponReceivePingMessage(PingMessage msg, Host from, short sourceProto, int channelId) {
-        logger.info("Received PingMessage with id: {} and message: {}", msg.getPingId(), msg.getMessage());
+        logger.debug("Received PingMessage with id: {} and message: {}", msg.getPingId(), msg.getMessage());
         // use connection created by client (TCPChannel.CONNECTION_IN) to reply with pong message
         sendMessage(new PongMessage(msg.getPingId(), msg.getMessage()), from, TCPChannel.CONNECTION_IN);
     }
@@ -186,8 +179,13 @@ public class PingPongProtocol extends GenericProtocol {
      * @param channelId Source channel ID (from which channel was the message was received)
      */
     public void uponReceivePongMessage(PongMessage msg, Host from, short sourceProto, int channelId) {
-        PongReply reply = ongoingRequest.produceReply(System.currentTimeMillis() - ongoingPings.get(msg.getPingId()));
-        sendReply(reply, ongoingRequestSource);
+        logger.debug("Received PongMessage with id: {} and message: {}", msg.getPingId(), msg.getMessage());
+        ongoingPing.incrementReceivedPongs();
+        PongReply reply = ongoingPing.getRequest().produceReply(System.currentTimeMillis() - ongoingPings.get(msg.getPingId()));
+        sendReply(reply, ongoingPing.getRequestSource());
+        if (ongoingPing.isDone()) {
+            closeConnection(from);
+        }
     }
 
     /**

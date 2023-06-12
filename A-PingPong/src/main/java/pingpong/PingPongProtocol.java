@@ -118,18 +118,20 @@ public class PingPongProtocol extends GenericProtocol {
      * @param timerId Timer ID
      */
     private void uponNextPing(NextPingTimer timer, long timerId) {
-        // send a ping message to target
-        sendPingMessage(pingTarget, message);
-
-        // increment the number of sent pings in the timer
-        timer.incrementSentPings();
-
         if (timer.getSentPings() >= nPings) { // if we have sent all pings
             logger.info("Sent {} pings. Closing connection", timer.getSentPings());
             cancelTimer(timerId); // cancel the timer
             closeConnection(pingTarget, channelId); // close the connection
             System.exit(0); // exit
         }
+
+        // send a ping message to target
+        sendPingMessage(pingTarget, message);
+
+        // increment the number of sent pings in the timer
+        timer.incrementSentPings();
+
+
     }
 
     /**

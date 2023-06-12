@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.StringTokenizer;
 
 public class App extends GenericProtocol {
@@ -24,12 +25,12 @@ public class App extends GenericProtocol {
 
     @Override
     public void init(Properties properties) throws HandlerRegistrationException, IOException {
-        // Prepare to read from stdin
-        new Thread(this::readSystemIn).start();
 
         // register protocol handlers
         // register reply handler
         registerReplyHandler(PongReply.REPLY_ID, this::onPongReply);
+
+        readSystemIn();
     }
 
     /**
@@ -40,8 +41,9 @@ public class App extends GenericProtocol {
      */
     private void onPongReply(PongReply pongReply, short sourceProto) {
         System.out.println("Received reply from " + pongReply.getDestination() + " in " + pongReply.getRTT() + "ms");
+        received++;
         if (received == pingRequest.getNPings()) {
-            pingRequest.notify(); //notify ping request that we are done
+            readSystemIn();
         }
     }
 
@@ -49,17 +51,18 @@ public class App extends GenericProtocol {
      * Reads commands from stdin
      */
     private void readSystemIn() {
-        while (true) {
-            try {
-                String line = System.console().readLine();
-                if (line == null) break;
-                if (line.equals("quit")) {
-                    System.exit(0);
-                }
-                readCommand(line);
-            } catch (Exception e) {
-                e.printStackTrace();
+        Scanner in = new Scanner(System.in);
+        try {
+            String line = in.nextLine();
+            if (line == null) {
+                System.exit(0);
             }
+            if (line.equals("quit")) {
+                System.exit(0);
+            }
+            readCommand(line);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -82,7 +85,6 @@ public class App extends GenericProtocol {
                 }
                 pingRequest = new PingRequest(message, destination, nPings);
                 sendRequest(pingRequest, PingPongProtocol.PROTO_ID);
-                pingRequest.wait(); // wait for ping to complete
                 break;
             default:
                 System.out.println("Unknown command: " + cmd);
