@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="B-PingPongApp" />
         <module name="C-Membership" />
+        <module name="D-Dissemination" />
         <module name="A-PingPong" />
       </profile>
     </annotationProcessing>
