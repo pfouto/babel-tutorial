@@ -94,9 +94,6 @@ public class MyProtocolTimer extends ProtoTimer {
 }
 ```
 
-```
-
-
 ## Exercise
 
 Implement the PingPong protocol.
