@@ -3,17 +3,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pt.unl.fct.di.novasys.babel.core.GenericProtocol;
 import pt.unl.fct.di.novasys.babel.exceptions.HandlerRegistrationException;
-import pt.unl.fct.di.novasys.babel.internal.InternalEvent;
-import pt.unl.fct.di.novasys.network.data.Host;
 import requests.BroadcastRequest;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.StringTokenizer;
-import java.util.concurrent.BlockingQueue;
 
 public class ChatApp extends GenericProtocol {
     private static final Logger logger = LogManager.getLogger(ChatApp.class);
