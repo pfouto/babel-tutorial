@@ -195,7 +195,7 @@ public class FullMembership extends GenericProtocol {
         logger.debug("Connection to {} is up", peer);
         pending.remove(peer);
         if (membership.add(peer)) {
-            logger.info("Added {} to membership", peer);
+            logger.debug("Added {} to membership", peer);
             triggerNotification(new PeerUp(peer));
         }
     }
@@ -205,7 +205,7 @@ public class FullMembership extends GenericProtocol {
         Host peer = event.getNode();
         logger.debug("Connection to {} is down cause {}", peer, event.getCause());
         membership.remove(event.getNode());
-        logger.info("Removed {} from membership", peer);
+        logger.debug("Removed {} from membership", peer);
         triggerNotification(new PeerDown(event.getNode()));
 
     }
