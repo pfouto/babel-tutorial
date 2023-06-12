@@ -15,8 +15,6 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        System.setProperty("log4j2.configurationFile", "log4j2.xml");
-
         //Creates a new instance of babel
         Babel babel = Babel.getInstance();
 

@@ -16,17 +16,12 @@ public class ShuffleMessage extends ProtoMessage {
 
 
     private final Set<Host> sample;
-    private final int shuffleId;
 
-    public ShuffleMessage(Set<Host> sample, int shuffleId) {
+    public ShuffleMessage(Set<Host> sample) {
         super(MSG_ID);
         this.sample = sample;
-        this.shuffleId = shuffleId;
     }
 
-    public int getShuffleId() {
-        return shuffleId;
-    }
 
     public Set<Host> getSample() {
         return sample;
@@ -36,14 +31,12 @@ public class ShuffleMessage extends ProtoMessage {
     public String toString() {
         return "ShuffleMessage{" +
                 ", sample=" + sample +
-                ", shuffleId=" + shuffleId +
                 '}';
     }
 
     public static ISerializer<ShuffleMessage> serializer = new ISerializer<ShuffleMessage>() {
         @Override
         public void serialize(ShuffleMessage shuffleMessage, ByteBuf out) throws IOException {
-            out.writeInt(shuffleMessage.shuffleId);
             out.writeInt(shuffleMessage.sample.size());
             for (Host h : shuffleMessage.sample)
                 Host.serializer.serialize(h, out);
@@ -51,12 +44,11 @@ public class ShuffleMessage extends ProtoMessage {
 
         @Override
         public ShuffleMessage deserialize(ByteBuf in) throws IOException {
-            int shuffleId = in.readInt();
             int size = in.readInt();
             Set<Host> subset = new HashSet<>(size, 1);
             for (int i = 0; i < size; i++)
                 subset.add(Host.serializer.deserialize(in));
-            return new ShuffleMessage(subset, shuffleId);
+            return new ShuffleMessage(subset);
         }
     };
 }
