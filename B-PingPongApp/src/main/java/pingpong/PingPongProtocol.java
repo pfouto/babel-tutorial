@@ -13,6 +13,7 @@ import pt.unl.fct.di.novasys.network.data.Host;
 import pingpong.requests.PingRequest;
 import pingpong.requests.PongReply;
 import pingpong.timers.NextPingTimer;
+import utils.NetworkingUtilities;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public class PingPongProtocol extends GenericProtocol {
         // set network address to listen on
         if (props.containsKey("interface"))
             //if defined interface, get interface address
-            channelProps.setProperty(TCPChannel.ADDRESS_KEY, Utils.getAddress(props.getProperty("interface")));
+            channelProps.setProperty(TCPChannel.ADDRESS_KEY, NetworkingUtilities.getAddress(props.getProperty("interface")));
         else if (props.containsKey("address"))
             // else use defined interface
             channelProps.setProperty(TCPChannel.ADDRESS_KEY, props.getProperty("address"));
