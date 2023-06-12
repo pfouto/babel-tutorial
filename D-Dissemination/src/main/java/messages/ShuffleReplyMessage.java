@@ -1,4 +1,4 @@
-package pingpong.messages;
+package messages;
 
 
 import io.netty.buffer.ByteBuf;
@@ -10,18 +10,16 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ShuffleMessage extends ProtoMessage {
+public class ShuffleReplyMessage extends ProtoMessage {
 
-    public final static short MSG_ID = 101;
-
+    public final static short MSG_ID = 102;
 
     private final Set<Host> sample;
 
-    public ShuffleMessage(Set<Host> sample) {
+    public ShuffleReplyMessage(Set<Host> sample) {
         super(MSG_ID);
         this.sample = sample;
     }
-
 
     public Set<Host> getSample() {
         return sample;
@@ -29,26 +27,26 @@ public class ShuffleMessage extends ProtoMessage {
 
     @Override
     public String toString() {
-        return "ShuffleMessage{" +
+        return "ShuffleReplyMessage{" +
                 ", sample=" + sample +
                 '}';
     }
 
-    public static ISerializer<ShuffleMessage> serializer = new ISerializer<ShuffleMessage>() {
+    public static ISerializer<ShuffleReplyMessage> serializer = new ISerializer<ShuffleReplyMessage>() {
         @Override
-        public void serialize(ShuffleMessage shuffleMessage, ByteBuf out) throws IOException {
+        public void serialize(ShuffleReplyMessage shuffleMessage, ByteBuf out) throws IOException {
             out.writeInt(shuffleMessage.sample.size());
             for (Host h : shuffleMessage.sample)
                 Host.serializer.serialize(h, out);
         }
 
         @Override
-        public ShuffleMessage deserialize(ByteBuf in) throws IOException {
+        public ShuffleReplyMessage deserialize(ByteBuf in) throws IOException {
             int size = in.readInt();
             Set<Host> subset = new HashSet<>(size, 1);
             for (int i = 0; i < size; i++)
                 subset.add(Host.serializer.deserialize(in));
-            return new ShuffleMessage(subset);
+            return new ShuffleReplyMessage(subset);
         }
     };
 }

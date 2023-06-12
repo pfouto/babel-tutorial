@@ -1,6 +1,8 @@
-
 import messages.ShuffleMessage;
 import messages.ShuffleReplyMessage;
+import notifications.ChannelNotification;
+import notifications.PeerDown;
+import notifications.PeerUp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pt.unl.fct.di.novasys.babel.core.GenericProtocol;
@@ -9,7 +11,7 @@ import pt.unl.fct.di.novasys.babel.generic.ProtoMessage;
 import pt.unl.fct.di.novasys.channel.tcp.TCPChannel;
 import pt.unl.fct.di.novasys.channel.tcp.events.*;
 import pt.unl.fct.di.novasys.network.data.Host;
-import pingpong.timers.ShuffleTimer;
+import timers.ShuffleTimer;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -110,6 +112,8 @@ public class FullMembership extends GenericProtocol {
 
         // Set up a periodic timer to send shuffle messages
         setupPeriodicTimer(new ShuffleTimer(), shuffleTimer, shuffleTimer);
+
+        triggerNotification(new ChannelNotification(self, channelId));
     }
 
     /*--------------------------------- Timers ---------------------------------------- */
@@ -192,6 +196,7 @@ public class FullMembership extends GenericProtocol {
         pending.remove(peer);
         if (membership.add(peer)) {
             logger.info("Added {} to membership", peer);
+            triggerNotification(new PeerUp(peer));
         }
     }
 
@@ -201,6 +206,8 @@ public class FullMembership extends GenericProtocol {
         logger.debug("Connection to {} is down cause {}", peer, event.getCause());
         membership.remove(event.getNode());
         logger.info("Removed {} from membership", peer);
+        triggerNotification(new PeerDown(event.getNode()));
+
     }
 
     //When a connection to a peer fails, we remove it from the pending set
