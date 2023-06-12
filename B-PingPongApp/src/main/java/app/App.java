@@ -9,7 +9,6 @@ import pt.unl.fct.di.novasys.network.data.Host;
 import utils.NetworkingUtilities;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.Scanner;
