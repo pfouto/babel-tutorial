@@ -36,7 +36,6 @@ public class NetworkingUtilities {
 
     public static Host parseHost(String s) throws UnknownHostException {
         String[] addr = s.split(":");
-        Host host = new Host(InetAddress.getByName(addr[0]), Integer.parseInt(addr[1]));
-        return host;
+        return new Host(InetAddress.getByName(addr[0]), Integer.parseInt(addr[1]));
     }
 }
