@@ -1,4 +1,4 @@
-package messages;
+package pingpong.messages;
 
 
 import io.netty.buffer.ByteBuf;

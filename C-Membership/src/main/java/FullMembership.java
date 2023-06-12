@@ -1,3 +1,4 @@
+
 import messages.ShuffleMessage;
 import messages.ShuffleReplyMessage;
 import org.apache.logging.log4j.LogManager;
@@ -8,7 +9,7 @@ import pt.unl.fct.di.novasys.babel.generic.ProtoMessage;
 import pt.unl.fct.di.novasys.channel.tcp.TCPChannel;
 import pt.unl.fct.di.novasys.channel.tcp.events.*;
 import pt.unl.fct.di.novasys.network.data.Host;
-import timers.ShuffleTimer;
+import pingpong.timers.ShuffleTimer;
 
 import java.io.IOException;
 import java.net.InetAddress;

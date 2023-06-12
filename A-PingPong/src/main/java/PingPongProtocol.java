@@ -1,5 +1,5 @@
-import messages.PingMessage;
-import messages.PongMessage;
+import pingpong.messages.PingMessage;
+import pingpong.messages.PongMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pt.unl.fct.di.novasys.babel.core.GenericProtocol;
@@ -8,7 +8,7 @@ import pt.unl.fct.di.novasys.babel.generic.ProtoMessage;
 import pt.unl.fct.di.novasys.channel.tcp.TCPChannel;
 import pt.unl.fct.di.novasys.channel.tcp.events.*;
 import pt.unl.fct.di.novasys.network.data.Host;
-import timers.NextPingTimer;
+import pingpong.timers.NextPingTimer;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -131,7 +131,7 @@ public class PingPongProtocol extends GenericProtocol {
 
     /**
      * Handle when an open connection operation succeeded
-     * Start the periodic timer to send Ping messages
+     * Start the periodic timer to send Ping pingpong.messages
      * @param event OutConnectionUp event
      * @param channel Channel ID
      */
