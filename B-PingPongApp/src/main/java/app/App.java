@@ -6,6 +6,7 @@ import pingpong.requests.PongReply;
 import pt.unl.fct.di.novasys.babel.core.GenericProtocol;
 import pt.unl.fct.di.novasys.babel.exceptions.HandlerRegistrationException;
 import pt.unl.fct.di.novasys.network.data.Host;
+import utils.NetworkingUtilities;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -72,8 +73,7 @@ public class App extends GenericProtocol {
         String cmd = tokenizer.nextToken();
         switch (cmd) {
             case "ping":
-                String[] addr = tokenizer.nextToken().split(":");
-                Host destination = new Host(InetAddress.getByName(addr[0]), Integer.parseInt(addr[1]));
+                Host destination = NetworkingUtilities.parseHost(tokenizer.nextToken());
                 String message = tokenizer.nextToken();
                 received = 0;
                 int nPings = 1;

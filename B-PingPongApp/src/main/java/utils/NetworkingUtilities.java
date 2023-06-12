@@ -1,15 +1,15 @@
+package utils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pt.unl.fct.di.novasys.network.data.Host;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.*;
 import java.util.Enumeration;
 
-public class Utils {
+public class NetworkingUtilities {
 
-    private static final Logger logger = LogManager.getLogger(Main.class);
+    private static final Logger logger = LogManager.getLogger(NetworkingUtilities.class);
 
     /**
      * Returns the ipv4 address of the given interface
@@ -34,4 +34,9 @@ public class Utils {
         return null;
     }
 
+    public static Host parseHost(String s) throws UnknownHostException {
+        String[] addr = s.split(":");
+        Host host = new Host(InetAddress.getByName(addr[0]), Integer.parseInt(addr[1]));
+        return host;
+    }
 }
