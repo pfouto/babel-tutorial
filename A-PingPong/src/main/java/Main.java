@@ -17,6 +17,7 @@ public class Main {
 
         System.setProperty("log4j2.configurationFile", "log4j2.xml");
 
+        //Creates a new instance of babel
         Babel babel = Babel.getInstance();
 
         //Reads arguments from the command line and loads them into a Properties object
@@ -35,6 +36,12 @@ public class Main {
         babel.start();
     }
 
+    /**
+     * Returns the ipv4 address of the given interface
+     * @param inter name of the interface
+     * @return ipv4 address of the interface
+     * @throws SocketException if the interface does not exist or does not have an ipv4 address
+     */
     public static String getAddress(String inter) throws SocketException {
         NetworkInterface byName = NetworkInterface.getByName(inter);
         if (byName == null) {

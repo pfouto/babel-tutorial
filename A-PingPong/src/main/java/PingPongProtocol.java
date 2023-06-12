@@ -17,19 +17,20 @@ import java.util.Properties;
 
 public class PingPongProtocol extends GenericProtocol {
 
-    public static final int DEFAULT_PORT = 9000;
-    private static final Logger logger = LogManager.getLogger(PingPongProtocol.class);
-    public static final short PROTO_ID = 1;
+    public static final int DEFAULT_PORT = 9000; // default port to listen on
+    private static final Logger logger = LogManager.getLogger(PingPongProtocol.class); // logger for the protocol
+    public static final short PROTO_ID = 1; // unique protocol id
 
 
-    private int channelId;
+    private int channelId; // id of the channel used by the protocol
 
-    private int nextPingId = 0;
+    private int nextPingId = 0; // id of the next ping message to send
 
-    private Host pingTarget;
-    private int nPings;
-    private String message;
-    private int pingIntervalMillis;
+    private Host pingTarget; // target to send pings to
+    private int nPings; // number of pings to send
+    private String message; // message to send in the ping
+    private int pingIntervalMillis; // interval between pings
+
     public PingPongProtocol() {
         // The super constructor receives the protocol name and the (unique) protocol ID
         super("PingPong", PROTO_ID);
@@ -78,8 +79,6 @@ public class PingPongProtocol extends GenericProtocol {
             // else use default value
             channelProps.setProperty(TCPChannel.PORT_KEY, DEFAULT_PORT + "");
 
-        // Receive a notification that the message was sent to the network
-        channelProps.setProperty(TCPChannel.TRIGGER_SENT_KEY, "true");
 
         // create the channel with the provided properties
         channelId = createChannel(TCPChannel.NAME, channelProps);
@@ -103,29 +102,51 @@ public class PingPongProtocol extends GenericProtocol {
         // register timer handlers
         registerTimerHandler(NextPingTimer.TIMER_ID, this::uponNextPing);
 
-        if(nPings > 0) {
+        if(nPings > 0) { // if we have to send pings
             logger.info("Opening a TCP connection to {}", pingTarget);
-            openConnection(pingTarget, channelId);
-        }
+            openConnection(pingTarget, channelId); // open connection to target
+        } // else wait for pings only
     }
 
+    /**
+     * Handle a Timer event
+     * Send a Ping message to the pingTarget
+     * @param timer NextPingTimer
+     * @param timerId Timer ID
+     */
     private void uponNextPing(NextPingTimer timer, long timerId) {
+        // send a ping message to target
         sendPingMessage(pingTarget, message);
+
+        // increment the number of sent pings in the timer
         timer.incrementSentPings();
-        if (timer.getSentPings() >= nPings) {
+
+        if (timer.getSentPings() >= nPings) { // if we have sent all pings
             logger.info("Sent {} pings. Closing connection", timer.getSentPings());
-            cancelTimer(timerId);
-            closeConnection(pingTarget, channelId);
-            System.exit(0);
+            cancelTimer(timerId); // cancel the timer
+            closeConnection(pingTarget, channelId); // close the connection
+            System.exit(0); // exit
         }
     }
 
+    /**
+     * Handle when an open connection operation succeeded
+     * Start the periodic timer to send Ping messages
+     * @param event OutConnectionUp event
+     * @param channel Channel ID
+     */
     private void uponOutConnectionUp(OutConnectionUp event, int channel) {
         logger.info("Connection to {} is now up", event.getNode());
         // start the timer
         setupPeriodicTimer(new NextPingTimer(), 0, pingIntervalMillis);
     }
 
+    /**
+     * Handle when an open connection operation has failed
+     * Print error message and exit
+     * @param event OutConnectionFailed event
+     * @param channel Channel ID
+     */
     private void uponOutConnectionFailed(OutConnectionFailed<ProtoMessage> event, int channel) {
         logger.debug(event);
         System.exit(1);
@@ -170,24 +191,43 @@ public class PingPongProtocol extends GenericProtocol {
 
     /**
      * Handle the case when a message fails to be (confirmed to be) delivered to the destination
+     * Print the error
      * @param msg the message that failed delivery
      * @param host the destination host
-     * @param i
-     * @param throwable
-     * @param i1
+     * @param destProto the destination protocol ID
+     * @param error the error that caused the failure
+     * @param channelId the channel ID (from which channel was the message was sent)
      */
-    private void uponMessageFailed(ProtoMessage msg, Host host, short i, Throwable throwable, int i1) {
-        logger.warn("Failed: " + msg + ", to: " + host + ", reason: " + throwable.getMessage());
+    private void uponMessageFailed(ProtoMessage msg, Host host, short destProto, Throwable error, int channelId) {
+        logger.warn("Failed message: {} to host: {} with error: {}", msg, host, error.getMessage());
     }
 
+    /**
+     * Handle the case when someone opened a connection to this node
+     * Print the event
+     * @param event the event containing the connection information
+     * @param channel the channel ID (from which channel the event was received)
+     */
     private void uponInConnectionUp(InConnectionUp event, int channel) {
         logger.debug(event);
     }
 
+    /**
+     * Handle the case when someone closed a connection to this node
+     * Print the event
+     * @param event the event containing the connection information
+     * @param channel the channel ID (from which channel the event was received)
+     */
     private void uponInConnectionDown(InConnectionDown event, int channel) {
         logger.info(event);
     }
 
+    /**
+     * Handle the case when a connection to a remote node went down or was closed
+     * Print the event
+     * @param event the event containing the connection information
+     * @param channel the channel ID (from which channel the event was received)
+     */
     private void uponOutConnectionDown(OutConnectionDown event, int channel) {
         logger.warn(event);
     }
