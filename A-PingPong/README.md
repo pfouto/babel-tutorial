@@ -5,8 +5,8 @@ In this step we build a very simple ping pong protocol with the following specif
 ## Protocol Specification
 
 The protocol has two messages:
-- ``PingMessage``: sent by the initiator and carries a monotonically increasing counter and a string message
-- ``PongMessage``: sent by the responder and carries a monotonically increasing counter and a string message
+- ``PingMessage``: sent by the initiator and carries a monotonically increasing ``counter`` and a string ``message``
+- ``PongMessage``: sent by the responder and carries a monotonically increasing ``counter`` and a string ``message``
 
 The protocol has one timer:
 - ``NextPingTimer``: used to trigger the next ping message
@@ -28,10 +28,13 @@ The protocol has the following parameters:
 
 
 The protocol works as follows:
-- The protocol will check if ``n_pings`` is set to higher than ``0``. If it is, the protocol will start a ``NextPingTimer`` with the period specified in ``ping_interval``.
+- The protocol will check if ``n_pings`` is set to higher than ``0``. If it is, the protocol will open a connection to the target host.
+- When the ``OutConnectionUp`` event is received, the protocol will start the ``NextPingTimer``.
 - When the ``NextPingTimer`` triggers, the protocol will send a ``PingMessage`` to the target host.
 - When the protocol receives a ``PingMessage`` it will send a ``PongMessage`` to the host that sent the ``PingMessage``.
 - When the protocol receives a ``PongMessage`` it will print the message to the console.
+- The protocol will stop sending ``PingMessage`` messages when it has sent ``n_pings`` messages.
+- When the protocol has sent ``n_pings`` messages, it will close the connection to the target host.
 
 
 Use the following abstractions to implement the protocol:
