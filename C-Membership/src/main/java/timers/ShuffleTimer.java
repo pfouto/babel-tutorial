@@ -1,4 +1,4 @@
-package timers;
+package pingpong.timers;
 
 
 import pt.unl.fct.di.novasys.babel.generic.ProtoTimer;
