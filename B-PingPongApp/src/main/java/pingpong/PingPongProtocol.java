@@ -1,3 +1,5 @@
+package pingpong;
+
 import pingpong.messages.PingMessage;
 import pingpong.messages.PongMessage;
 import org.apache.logging.log4j.LogManager;
@@ -8,14 +10,17 @@ import pt.unl.fct.di.novasys.babel.generic.ProtoMessage;
 import pt.unl.fct.di.novasys.channel.tcp.TCPChannel;
 import pt.unl.fct.di.novasys.channel.tcp.events.*;
 import pt.unl.fct.di.novasys.network.data.Host;
+import pingpong.requests.PingRequest;
+import pingpong.requests.PongReply;
 import pingpong.timers.NextPingTimer;
 
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class PingPongProtocol extends GenericProtocol {
+
 
     public static final int DEFAULT_PORT = 9000; // default port to listen on
     private static final Logger logger = LogManager.getLogger(PingPongProtocol.class); // logger for the protocol
@@ -25,11 +30,14 @@ public class PingPongProtocol extends GenericProtocol {
     private int channelId; // id of the channel used by the protocol
 
     private int nextPingId = 0; // id of the next ping message to send
-
-    private Host pingTarget; // target to send pings to
-    private int nPings; // number of pings to send
-    private String message; // message to send in the ping
     private int pingIntervalMillis; // interval between pings
+
+    private int nextPendingRequest = 0; // id of the next pending request
+
+    private PingRequest ongoingRequest = null; // ongoing request (if any)
+    private short ongoingRequestSource = -1; // source of the ongoing request (if any)
+
+    private Map<Integer, Long> ongoingPings = new HashMap<>(); // map of ongoing pings (id -> send time)
 
     public PingPongProtocol() {
         // The super constructor receives the protocol name and the (unique) protocol ID
@@ -39,31 +47,14 @@ public class PingPongProtocol extends GenericProtocol {
 
     public void init(Properties props) throws IOException, HandlerRegistrationException {
 
-        if(props.containsKey("n_pings")){
-            nPings = Integer.parseInt(props.getProperty("n_pings"));
-        } else
-            nPings = 0;
 
-        if(nPings > 0) {
-            message = props.getProperty("message");
-            pingIntervalMillis = Integer.parseInt(props.getProperty("ping_interval"));
-
-            InetAddress pingTargetAddr = Inet4Address.getByName(props.getProperty("target_address"));
-            int pingTargetPort;
-            if (props.containsKey("target_port"))
-                pingTargetPort = Integer.parseInt(props.getProperty("target_port"));
-            else
-                pingTargetPort = DEFAULT_PORT;
-
-            pingTarget = new Host(pingTargetAddr, pingTargetPort);
-        }
         Properties channelProps = new Properties();
         // configuration of the network channel
 
         // set network address to listen on
         if (props.containsKey("interface"))
             //if defined interface, get interface address
-            channelProps.setProperty(TCPChannel.ADDRESS_KEY, Main.getAddress(props.getProperty("interface")));
+            channelProps.setProperty(TCPChannel.ADDRESS_KEY, Utils.getAddress(props.getProperty("interface")));
         else if (props.containsKey("address"))
             // else use defined interface
             channelProps.setProperty(TCPChannel.ADDRESS_KEY, props.getProperty("address"));
@@ -102,10 +93,16 @@ public class PingPongProtocol extends GenericProtocol {
         // register timer handlers
         registerTimerHandler(NextPingTimer.TIMER_ID, this::uponNextPing);
 
-        if(nPings > 0) { // if we have to send pings
-            logger.info("Opening a TCP connection to {}", pingTarget);
-            openConnection(pingTarget, channelId); // open connection to target
-        } // else wait for pings only
+        // register request handlers
+        registerRequestHandler(PingRequest.REQUEST_ID, this::uponReceivePingRequest);
+
+    }
+
+    private void uponReceivePingRequest(PingRequest pingRequest, short sourceProtocol) {
+        ongoingRequest = pingRequest;
+        logger.info("Received ping request to {}. Sending {} pings.",
+                pingRequest.getDestination(), pingRequest.getNPings());
+        openConnection(pingRequest.getDestination(), channelId);
     }
 
     /**
@@ -116,15 +113,16 @@ public class PingPongProtocol extends GenericProtocol {
      */
     private void uponNextPing(NextPingTimer timer, long timerId) {
         // send a ping message to target
-        sendPingMessage(pingTarget, message);
+        sendPingMessage(ongoingRequest.getDestination(),
+                ongoingRequest.getMessage());
 
         // increment the number of sent pings in the timer
         timer.incrementSentPings();
 
-        if (timer.getSentPings() >= nPings) { // if we have sent all pings
+        if (timer.getSentPings() >= ongoingRequest.getNPings()) { // if we have sent all pings
             logger.info("Sent {} pings. Closing connection", timer.getSentPings());
             cancelTimer(timerId); // cancel the timer
-            closeConnection(pingTarget, channelId); // close the connection
+            closeConnection(ongoingRequest.getDestination(), channelId); // close the connection
             System.exit(0); // exit
         }
     }
@@ -160,7 +158,8 @@ public class PingPongProtocol extends GenericProtocol {
      */
     public void sendPingMessage(Host destination, String message) {
         logger.debug("Sending Ping Message to {} with message {}", destination, message);
-        sendMessage(new PingMessage(++nextPingId, message), destination);
+        ongoingPings.put(++nextPingId, System.currentTimeMillis());
+        sendMessage(new PingMessage(nextPingId, message), destination);
     }
 
     /**
@@ -186,7 +185,8 @@ public class PingPongProtocol extends GenericProtocol {
      * @param channelId Source channel ID (from which channel was the message was received)
      */
     public void uponReceivePongMessage(PongMessage msg, Host from, short sourceProto, int channelId) {
-        logger.info("Received PongMessage with id: {} and message: {}", msg.getPingId(), msg.getMessage());
+        PongReply reply = ongoingRequest.produceReply(System.currentTimeMillis() - ongoingPings.get(msg.getPingId()));
+        sendReply(reply, ongoingRequestSource);
     }
 
     /**
