@@ -48,8 +48,8 @@ public class FullMembership extends GenericProtocol {
 
     @Override
     public void init(Properties properties) throws IOException, HandlerRegistrationException {
-        this.subsetSize = Integer.parseInt(properties.getProperty("sample_size"));
-        int shuffleTimer = Integer.parseInt(properties.getProperty("shuffle_time"));
+        this.subsetSize = Integer.parseInt(properties.getProperty("sample_size", "2"));
+        int shuffleTimer = Integer.parseInt(properties.getProperty("shuffle_time", "5000"));
 
         Properties channelProps = new Properties();
 
@@ -133,8 +133,9 @@ public class FullMembership extends GenericProtocol {
             Host target = getRandom(membership);
             Set<Host> subset = getRandomSubsetExcluding(membership, subsetSize, target);
             subset.add(self);
-            sendMessage(new ShuffleMessage(subset), target);
-            logger.debug("Sent SampleMessage {}", target);
+            ShuffleMessage msg = new ShuffleMessage(subset);
+            sendMessage(msg, target);
+            logger.debug("Sent {} to {}", msg, target);
         }
     }
 
@@ -147,7 +148,9 @@ public class FullMembership extends GenericProtocol {
 
         Set<Host> subset = getRandomSubsetExcluding(membership, subsetSize, from);
         subset.add(self);
-        sendMessage(new ShuffleReplyMessage(subset), from, TCPChannel.CONNECTION_IN);
+        ShuffleReplyMessage reply = new ShuffleReplyMessage(subset);
+        sendMessage(reply, from, TCPChannel.CONNECTION_IN);
+        logger.debug("Sent {} to {}", reply, from);
         for (Host h : msg.getSample()) {
             if (!h.equals(self) && !membership.contains(h) && !pending.contains(h)) {
                 pending.add(h);

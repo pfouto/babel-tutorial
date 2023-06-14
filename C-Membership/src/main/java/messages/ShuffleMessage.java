@@ -30,7 +30,7 @@ public class ShuffleMessage extends ProtoMessage {
     @Override
     public String toString() {
         return "ShuffleMessage{" +
-                ", sample=" + sample +
+                "sample=" + sample +
                 '}';
     }
 
