@@ -26,6 +26,9 @@ P. Fouto, P. Á. Costa, N. Preguiça and J. Leitão,
 doi: 10.1109/SRDS55811.2022.00022.
 ```
 
+If you want to check other examples of distributed protocols and applications developed using Babel, please check the [Babel Examples](https://github.com/pedroAkos/babel-case-studies) repository, and
+these other two repositories: [Edge Overlay Networks](https://github.com/pedroAkos/EdgeOverlayNetworks) and [ChainPaxos](https://github.com/pfouto/chain).
+
 In this tutorial, we will guide you through the process of developing a simple PingPong protocol and a simple Chat application
 using Babel.
 
