@@ -193,10 +193,14 @@ public class Main {
 
 ``docker build  -t babel-tutorial/a-pingpong .``
 
+
+``docker network create babel-tutorial-net`` 
+``docker network rm babel-tutorial-net``
+
 ## How to run
 
 ### Args
 
-``docker run --rm -h server -it babel-tutorial/a-pingpong interface=eth0 port=9000``
+``docker run --network babel-tutorial-net --rm -h ping-server --name ping-server -it babel-tutorial/a-pingpong interface=eth0``
 
-``docker run --rm -h client -it babel-tutorial/a-pingpong interface=eth0 port=9001 target_addres=server target_port=9000``
+``docker run --network babel-tutorial-net --rm -h ping-client --name ping-client -it babel-tutorial/a-pingpong interface=eth0 target_address=ping-server n_pings=1 message=hello``

@@ -42,7 +42,20 @@ public class App extends GenericProtocol {
 
 ```
 
-
 ## How to compile
 
+``mvn clean package``
+
+``docker build  -t babel-tutorial/b-pingpongapp .``
+
+
+``docker network create babel-tutorial-net``
+``docker network rm babel-tutorial-net``
+
 ## How to run
+
+### Args
+
+``docker run --network babel-tutorial-net --rm -h ping-server --name ping-server -it babel-tutorial/b-pingpongapp interface=eth0``
+
+``docker run --network babel-tutorial-net --rm -h ping-client --name ping-client -it babel-tutorial/b-pingpongapp interface=eth0``

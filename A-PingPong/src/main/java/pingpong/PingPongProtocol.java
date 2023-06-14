@@ -49,7 +49,7 @@ public class PingPongProtocol extends GenericProtocol {
 
         if(nPings > 0) {
             message = props.getProperty("message");
-            pingIntervalMillis = Integer.parseInt(props.getProperty("ping_interval"));
+            pingIntervalMillis = Integer.parseInt(props.getProperty("ping_interval", "100"));
 
             InetAddress pingTargetAddr = Inet4Address.getByName(props.getProperty("target_address"));
             int pingTargetPort;
@@ -86,6 +86,8 @@ public class PingPongProtocol extends GenericProtocol {
         // create the channel with the provided properties
         channelId = createChannel(TCPChannel.NAME, channelProps);
 
+        logger.info("PingPongProtocol initialized, running on " + channelProps.getProperty(TCPChannel.ADDRESS_KEY) + ":" + channelProps.getProperty(TCPChannel.PORT_KEY));
+
         // register channel event handlers
         registerChannelEventHandler(channelId, InConnectionDown.EVENT_ID, this::uponInConnectionDown);
         registerChannelEventHandler(channelId, InConnectionUp.EVENT_ID, this::uponInConnectionUp);
@@ -106,7 +108,7 @@ public class PingPongProtocol extends GenericProtocol {
         registerTimerHandler(NextPingTimer.TIMER_ID, this::uponNextPing);
 
         if(nPings > 0) { // if we have to send pings
-            logger.info("Opening a TCP connection to {}", pingTarget);
+            logger.info("Opening a TCP connection to ping target {}", pingTarget);
             openConnection(pingTarget, channelId); // open connection to target
         } // else wait for pings only
     }
