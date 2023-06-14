@@ -28,7 +28,7 @@ public class ShuffleReplyMessage extends ProtoMessage {
     @Override
     public String toString() {
         return "ShuffleReplyMessage{" +
-                ", sample=" + sample +
+                "sample=" + sample +
                 '}';
     }
 
