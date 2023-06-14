@@ -100,13 +100,13 @@ public class FullMembership extends GenericProtocol {
 
 ## How to run
 
-- Run a contact node:
-
 ``docker network create babel-tutorial-net``
 
-- Then run any number of nodes, specifying the contact node:
+- Run a contact node:
 
 ``docker run --network babel-tutorial-net --rm -h node-1 --name node-1 -it babel-tutorial/c-membership sample_size=2``
+
+- Then run any number of nodes, specifying the contact node:
 
 ``docker run --network babel-tutorial-net --rm -h node-2 --name node-2 -it babel-tutorial/c-membership sample_size=2 contact=node-1:8000``
 

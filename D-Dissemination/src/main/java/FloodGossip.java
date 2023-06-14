@@ -81,7 +81,7 @@ public class FloodGossip extends GenericProtocol {
             List<Host> randomPeers = new LinkedList<>(peers);
             randomPeers.remove(from);
             Collections.shuffle(randomPeers);
-            randomPeers.subList(0, Math.min(3, randomPeers.size())).forEach(host -> {
+            randomPeers.subList(0, Math.min(2, randomPeers.size())).forEach(host -> {
                 if (!host.equals(from)) {
                     sendMessage(msg, host);
                     logger.trace("Sent {} to {}", msg, host);
