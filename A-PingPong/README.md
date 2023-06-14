@@ -41,7 +41,43 @@ Use the following abstractions to implement the protocol:
 
 ## Networking and Timer Abstractions
 
+Babel offers simple and generic networking and timer abstractions.
+These come in the form of abstract Java classes and API functions.
+
+Networking abstractions allow developers to send and receive network messages.
+This enables developers to implement network protocols without having to deal with the underlying network stack.
+
+Timer abstraction allows developers to schedule events to trigger after a given delay.
+These are useful to implement protocols that require periodic actions or need to handle timeouts.
+
+
+
 ### Networking Abstractions
+
+
+Networking abstractions include:
+- Network ``channel`` abstractions, that provide an interface to the operating system network stack.
+``ProtoMessage`` abstract Java class, that defines a Babel network message type.
+- ``sendMessage`` API calls, that deliver a network message to the ``channel``  abstraction to be sent to a different process.
+
+
+
+You need to create a channel to be able to send message to the network.
+You can do this as follows:
+```java
+
+Properties channelProps = new Properties();
+channelProps.setProperty(TCPChannel.ADDRESS_KEY, "127.0.0.1");
+channelProps.setProperty(TCPChannel.PORT_KEY, "9000");
+
+// create the channel with the provided properties
+// createChannel is a function defined in the GenericProtocol class
+channelId = createChannel(TCPChannel.NAME, channelProps);
+
+```
+
+You need to define a Protocol Messages for your protocol.
+You do this by extending the ProtoMessage class:
 
 ```java
 import pt.unl.fct.di.novasys.babel.generic.ProtoMessage;
@@ -73,8 +109,24 @@ public class MyProtocolMessage extends ProtoMessage {
 }
 ```
 
+To send the message, just use the ``sendMessage`` API call, as follows:
+```java
+// define a Host destination object
+destination = new Host(Inet4Address.getByName("127.0.0.1"), 9001);
+// send the message
+sendMessage(new MyProtocolMessage(), destination);
+```
+
+
 ### Timer Abstractions
 
+Timer abstraction include:
+- ``ProtoTimer`` abstract Java class, that defines a Babel timer event type.
+- ``setupTimer`` API calls, that prepare a timer event to trigger after a given delay.
+- ``setupPeriodTimer`` API calls, that prepare a timer event to trigger periodically after a given delay.
+- ``cancelTimer`` API calls, that cancel a previously setup timer event.
+
+To define the timer event, you need to extend the ProtoTimer class:
 ```java
 import pt.unl.fct.di.novasys.babel.generic.ProtoTimer;
 
@@ -96,6 +148,28 @@ public class MyProtocolTimer extends ProtoTimer {
     }
 }
 ```
+
+To setup a timer, just use the ``setupTimer`` API call, as follows:
+```java
+// setup a timer to trigger after 1000 milliseconds
+// returns the id of the timer event
+long timerId = setupTimer(new MyProtocolTimer(), 1000);
+```
+
+To setup a periodic timer, just use the ``setupPeriodTimer`` API call, as follows:
+```java
+// setup a timer to trigger after 1000 milliseconds and then every 500 milliseconds
+// returns the id of the timer event
+long timerId = setupPeriodTimer(new MyProtocolTimer(), 1000, 500);
+```
+
+To cancel a timer, just use the ``cancelTimer`` API call, as follows:
+```java
+// cancel the timer event with the given id
+cancelTimer(timerId);
+```
+
+
 
 ## Exercise
 
@@ -189,18 +263,36 @@ public class Main {
 
 ## How to compile
 
-``mvn clean package``
+To compile your code, run the following commands:
+- ``mvn clean package``
+- ``docker build  -t babel-tutorial/a-pingpong .``
 
-``docker build  -t babel-tutorial/a-pingpong .``
-
-
-``docker network create babel-tutorial-net`` 
-``docker network rm babel-tutorial-net``
 
 ## How to run
 
+### Setup
+You need to create a docker network for the tutorial:
+``docker network create babel-tutorial-net``
+
+To remove the network:
+``docker network rm babel-tutorial-net``
+
 ### Args
 
+The protocol accepts the following arguments:
+- ``interface``: the network interface to use (e.g., eth0)
+- ``target_address``: the address of the target host (e.g., ping-server)
+- ``n_pings``: the number of pings to send (e.g., 1)
+- ``message``: the message to send (e.g., hello)
+- ``ping_interval``: the period between pings (in milliseconds)
+
+### Run
+To run the protocol, you need to run the following commands:
+
+This will run the protocol in server mode:
+
 ``docker run --network babel-tutorial-net --rm -h ping-server --name ping-server -it babel-tutorial/a-pingpong interface=eth0``
+
+This will run the protocol in client mode:
 
 ``docker run --network babel-tutorial-net --rm -h ping-client --name ping-client -it babel-tutorial/a-pingpong interface=eth0 target_address=ping-server n_pings=1 message=hello``
