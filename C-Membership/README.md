@@ -94,13 +94,18 @@ public class FullMembership extends GenericProtocol {
 
 ## How to compile
 
-``mvn clean package``
-
-``docker build -t babel-tutorial/c-membership .``
+To compile your code, run the following commands:
+- ``mvn clean package``
+- ``docker build -t babel-tutorial/c-membership .``
 
 ## How to run
 
+### Setup
+You need to create a docker network for the tutorial:
 ``docker network create babel-tutorial-net``
+
+To remove the network:
+``docker network rm babel-tutorial-net``
 
 - Run a contact node:
 
