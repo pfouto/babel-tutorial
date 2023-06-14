@@ -12,6 +12,7 @@ import pt.unl.fct.di.novasys.channel.tcp.TCPChannel;
 import pt.unl.fct.di.novasys.channel.tcp.events.*;
 import pt.unl.fct.di.novasys.network.data.Host;
 import timers.ShuffleTimer;
+import utils.NetworkingUtilities;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -55,12 +56,12 @@ public class FullMembership extends GenericProtocol {
 
         if (properties.containsKey("interface"))
             //if defined interface, get interface address
-            channelProps.setProperty(TCPChannel.ADDRESS_KEY, Main.getAddress(properties.getProperty("interface")));
+            channelProps.setProperty(TCPChannel.ADDRESS_KEY, NetworkingUtilities.getAddress(properties.getProperty("interface")));
         else if (properties.containsKey("address"))
             // else use defined interface
             channelProps.setProperty(TCPChannel.ADDRESS_KEY, properties.getProperty("address"));
         else {
-            // channel will throw exception upon creation
+            channelProps.setProperty(TCPChannel.ADDRESS_KEY, NetworkingUtilities.getAddress("eth0"));
         }
 
         // set network port to listen on

@@ -55,7 +55,7 @@ public class PingPongProtocol extends GenericProtocol {
             // else use defined interface
             channelProps.setProperty(TCPChannel.ADDRESS_KEY, props.getProperty("address"));
         else {
-            // channel will throw exception upon creation
+            channelProps.setProperty(TCPChannel.ADDRESS_KEY, NetworkingUtilities.getAddress("eth0"));
         }
 
         // set network port to listen on
