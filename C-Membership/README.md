@@ -3,3 +3,8 @@
 ## Membership Protocol Specification
 
 
+## How to compile
+
+## How to run
+
+
