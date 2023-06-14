@@ -5,17 +5,26 @@
 
 ## How to compile
 
-``mvn clean package``
+To compile your code, run the following commands:
+- ``mvn clean package``
+- ``docker build  -t babel-tutorial/e-chat .``
 
-``docker build  -t babel-tutorial/e-chat .``
 
-
-``docker network create babel-tutorial-net``
-``docker network rm babel-tutorial-net``
 
 ## How to run
 
+## How to run
+
+### Setup
+You need to create a docker network for the tutorial:
+``docker network create babel-tutorial-net``
+
+To remove the network:
+``docker network rm babel-tutorial-net``
+
 ### Args
+
+### Run
 
 ``docker run --network babel-tutorial-net --rm -h node-1 --name node-1 -it babel-tutorial/e-chat interface=eth0``
 

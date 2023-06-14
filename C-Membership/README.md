@@ -94,17 +94,33 @@ public class FullMembership extends GenericProtocol {
 
 ## How to compile
 
-``mvn clean package``
-
-``docker build -t babel-tutorial/c-membership .``
+To compile your code, run the following commands:
+- ``mvn clean package``
+- ``docker build -t babel-tutorial/c-membership .``
 
 ## How to run
 
-- Run a contact node:
+### Setup
+You need to create a docker network for the tutorial:
+``docker network create babel-tutorial-net``
+
+To remove the network:
+``docker network rm babel-tutorial-net``
+
+### Args
+
+The protocol accepts the following arguments:
+- ``sample_size``: the size of the sample to exchange
+- ``shuffle_time``: the period between shuffle steps (in milliseconds) (default: 1000)
+- ``contact``: the ip address and port of a node in the network (in the format `ip:port`)
+
+### Run
+
+Run a contact node:
 
 ``docker network create babel-tutorial-net``
 
-- Then run any number of nodes, specifying the contact node:
+Then run any number of nodes, specifying the contact node:
 
 ``docker run --network babel-tutorial-net --rm -h node-1 --name node-1 -it babel-tutorial/c-membership sample_size=2``
 
