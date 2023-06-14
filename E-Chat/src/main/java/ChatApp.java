@@ -48,7 +48,7 @@ public class ChatApp extends GenericProtocol {
     }
 
     private void uponDeliver(DeliverNotification not, short sourceProto) {
-        logger.info("Received via {}: {} - {} hops", not.getVia().getPort(), not.getMsg(), not.getnHops());
+        logger.info("Received via {}: {} - {} hops", not.getVia(), not.getMsg(), not.getnHops());
     }
 
 }
