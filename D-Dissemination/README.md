@@ -143,7 +143,24 @@ public class FloodGossip extends GenericProtocol {
 
 ## How to run
 
+### Setup
+You need to create a docker network for the tutorial:
 ``docker network create babel-tutorial-net``
+
+To remove the network:
+``docker network rm babel-tutorial-net``
+
+
+### Args
+
+The protocol accepts the following arguments:
+- ``gossip_time``: the period between gossip steps (in milliseconds)
+- ``gossip_size``: the number of known peers to which each message should be disseminated
+- ``sample_size``: the number of peers to sample from the membership
+- ``contact``: the address of a contact node (in the form ``host:port``)
+
+
+### Run
 
 - Run a contact node:
 

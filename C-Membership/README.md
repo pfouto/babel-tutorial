@@ -107,6 +107,16 @@ You need to create a docker network for the tutorial:
 To remove the network:
 ``docker network rm babel-tutorial-net``
 
+### Args
+
+The protocol takes the following arguments:
+- ``sample_size``: the size of the sample to exchange
+- ``shuffle_time``: the period between shuffle steps (in milliseconds)
+- ``contact``: the ip address and port of a node in the network (in the format `ip:port`)
+
+
+### Run
+
 - Run a contact node:
 
 ``docker run --network babel-tutorial-net --rm -h node-1 --name node-1 -it babel-tutorial/c-membership sample_size=2``
