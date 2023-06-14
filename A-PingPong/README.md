@@ -186,3 +186,17 @@ public class Main {
 
 }
 ```
+
+## How to compile
+
+``mvn clean package``
+
+``docker build  -t babel-tutorial/a-pingpong .``
+
+## How to run
+
+### Args
+
+``docker run --rm -h server -it babel-tutorial/a-pingpong interface=eth0 port=9000``
+
+``docker run --rm -h client -it babel-tutorial/a-pingpong interface=eth0 port=9001 target_addres=server target_port=9000``
