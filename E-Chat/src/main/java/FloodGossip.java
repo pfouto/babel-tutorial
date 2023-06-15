@@ -23,6 +23,8 @@ public class FloodGossip extends GenericProtocol {
     private final Set<Host> peers = new HashSet<>();
     private final Set<UUID> received;
 
+    private int gossipSize;
+
     public FloodGossip() {
         super(PROTO_NAME, PROTO_ID);
 
@@ -31,6 +33,8 @@ public class FloodGossip extends GenericProtocol {
 
     @Override
     public void init(Properties props) throws HandlerRegistrationException {
+        this.gossipSize = Integer.parseInt(props.getProperty("gossip_size", "2"));
+
         /*--------------------- Register Notification Handlers ------------------------ */
         subscribeNotification(PeerUp.NOTIFICATION_ID, this::uponPeerUp);
         subscribeNotification(PeerDown.NOTIFICATION_ID, this::uponPeerDown);
@@ -76,7 +80,7 @@ public class FloodGossip extends GenericProtocol {
             List<Host> randomPeers = new LinkedList<>(peers);
             randomPeers.remove(from);
             Collections.shuffle(randomPeers);
-            randomPeers.subList(0, Math.min(2, randomPeers.size())).forEach(host -> {
+            randomPeers.subList(0, Math.min(gossipSize, randomPeers.size())).forEach(host -> {
                 if (!host.equals(from)) {
                     sendMessage(msg, host);
                     logger.trace("Sent {} to {}", msg, host);

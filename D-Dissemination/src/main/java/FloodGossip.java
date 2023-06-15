@@ -24,6 +24,9 @@ public class FloodGossip extends GenericProtocol {
 
     private int gossipCounter;
 
+    private int gossipTime;
+    private int gossipSize;
+
     public FloodGossip() {
         super(PROTO_NAME, PROTO_ID);
 
@@ -32,6 +35,9 @@ public class FloodGossip extends GenericProtocol {
 
     @Override
     public void init(Properties props) throws HandlerRegistrationException {
+        this.gossipTime = Integer.parseInt(props.getProperty("gossip_time", "5000"));
+        this.gossipSize = Integer.parseInt(props.getProperty("gossip_size", "2"));
+
         /*--------------------- Register Notification Handlers ------------------------ */
         subscribeNotification(PeerUp.NOTIFICATION_ID, this::uponPeerUp);
         subscribeNotification(PeerDown.NOTIFICATION_ID, this::uponPeerDown);
@@ -53,7 +59,7 @@ public class FloodGossip extends GenericProtocol {
             registerMessageHandler(not.getChannelId(), GossipMessage.MSG_ID, this::uponReceiveGossip);
 
             //Setup a timer for random gossip messages
-            setupPeriodicTimer(new RandomGossipTimer(), 5000, 5000);
+            setupPeriodicTimer(new RandomGossipTimer(), gossipTime, gossipTime);
         } catch (HandlerRegistrationException e) {
             throw new RuntimeException(e);
         }
@@ -81,7 +87,7 @@ public class FloodGossip extends GenericProtocol {
             List<Host> randomPeers = new LinkedList<>(peers);
             randomPeers.remove(from);
             Collections.shuffle(randomPeers);
-            randomPeers.subList(0, Math.min(2, randomPeers.size())).forEach(host -> {
+            randomPeers.subList(0, Math.min(gossipSize, randomPeers.size())).forEach(host -> {
                 if (!host.equals(from)) {
                     sendMessage(msg, host);
                     logger.trace("Sent {} to {}", msg, host);
