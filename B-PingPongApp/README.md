@@ -95,8 +95,9 @@ When the reply is received, the App protocol prints the reply to the console.
 
 The App protocol should be able to handle a single command in the format:
 
-    ``ping <target_addr:target_port> <message> [n_pings]``
-    where ``<target_addr:target_port>`` is the address and port of the target node, ``<message>`` is the message to be sent in the ``PingRequest`` and ``[n_pings]`` is the number of pings to send (default is 1).
+``ping <target_addr:target_port> <message> [n_pings]``
+
+where ``<target_addr:target_port>`` is the address and port of the target node, ``<message>`` is the message to be sent in the ``PingRequest`` and ``[n_pings]`` is the number of pings to send (default is 1).
 
 
 The App protocol should look like this:
