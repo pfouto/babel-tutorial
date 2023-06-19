@@ -114,7 +114,7 @@ To send the message, just use the ``sendMessage`` API call, as follows:
 // define a Host destination object
 destination = new Host(Inet4Address.getByName("127.0.0.1"), 9001);
 // send the message
-sendMessage(new MyProtocolMessage(), destination);
+sendMessage(channelId, new MyProtocolMessage(), destination);
 ```
 
 

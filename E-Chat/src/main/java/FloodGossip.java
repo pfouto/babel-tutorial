@@ -82,7 +82,7 @@ public class FloodGossip extends GenericProtocol {
             Collections.shuffle(randomPeers);
             randomPeers.subList(0, Math.min(gossipSize, randomPeers.size())).forEach(host -> {
                 if (!host.equals(from)) {
-                    sendMessage(msg, host);
+                    sendMessage(channelId, msg, host);
                     logger.trace("Sent {} to {}", msg, host);
                 }
             });

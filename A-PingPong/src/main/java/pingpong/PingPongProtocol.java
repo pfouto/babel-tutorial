@@ -167,7 +167,7 @@ public class PingPongProtocol extends GenericProtocol {
      */
     public void sendPingMessage(Host destination, String message) {
         logger.debug("Sending Ping Message to {} with message {}", destination, message);
-        sendMessage(new PingMessage(++nextPingId, message), destination);
+        sendMessage(channelId, new PingMessage(++nextPingId, message), destination);
     }
 
     /**
@@ -181,7 +181,7 @@ public class PingPongProtocol extends GenericProtocol {
     public void uponReceivePingMessage(PingMessage msg, Host from, short sourceProto, int channelId) {
         logger.info("Received PingMessage with id: {} and message: {}", msg.getPingId(), msg.getMessage());
         // use connection created by client (TCPChannel.CONNECTION_IN) to reply with pong message
-        sendMessage(new PongMessage(msg.getPingId(), msg.getMessage()), from, TCPChannel.CONNECTION_IN);
+        sendMessage(channelId, new PongMessage(msg.getPingId(), msg.getMessage()), from, TCPChannel.CONNECTION_IN);
     }
 
     /**

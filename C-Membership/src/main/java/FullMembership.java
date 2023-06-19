@@ -130,7 +130,7 @@ public class FullMembership extends GenericProtocol {
             Set<Host> subset = getRandomSubsetExcluding(membership, subsetSize, target);
             subset.add(self);
             ShuffleMessage msg = new ShuffleMessage(subset);
-            sendMessage(msg, target);
+            sendMessage(channelId, msg, target);
             logger.debug("Sent {} to {}", msg, target);
         }
     }
@@ -145,7 +145,7 @@ public class FullMembership extends GenericProtocol {
         Set<Host> subset = getRandomSubsetExcluding(membership, subsetSize, from);
         subset.add(self);
         ShuffleReplyMessage reply = new ShuffleReplyMessage(subset);
-        sendMessage(reply, from, TCPChannel.CONNECTION_IN);
+        sendMessage(channelId, reply, from, TCPChannel.CONNECTION_IN);
         logger.debug("Sent {} to {}", reply, from);
         for (Host h : msg.getSample()) {
             if (!h.equals(self) && !membership.contains(h) && !pending.contains(h)) {
