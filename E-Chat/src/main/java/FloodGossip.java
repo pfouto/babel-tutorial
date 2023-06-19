@@ -25,6 +25,8 @@ public class FloodGossip extends GenericProtocol {
 
     private int gossipSize;
 
+    private int channelId;
+
     public FloodGossip() {
         super(PROTO_NAME, PROTO_ID);
 
@@ -49,6 +51,7 @@ public class FloodGossip extends GenericProtocol {
         logger.debug("I am {}", not.getMyself());
         logger.debug("Using channel {} for communication", not.getChannelId());
         myself = not.getMyself();
+        channelId = not.getChannelId();
         try {
             registerSharedChannel(not.getChannelId());
             /*---------------------- Register Message Serializers ---------------------- */
@@ -72,7 +75,7 @@ public class FloodGossip extends GenericProtocol {
     /*--------------------------------- Messages ---------------------------------------- */
     //Upon receiving a gossip message, we check if we have already received it, and if not, we deliver it and send it to
     //3 random peers (excluding the sender)
-    private void uponReceiveGossip(GossipMessage msg, Host from, short sourceProto, int channelId) {
+    private void uponReceiveGossip(GossipMessage msg, Host from, short sourceProto, int cId) {
         logger.trace("Received {} from {}", msg, from);
         if (received.add(msg.getMid())) {
             triggerNotification(new DeliverNotification(msg.getContent(), from, msg.getRound()));
